@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ============================================
-#   RASYAPREM v1.1
+#   RASYAPREM v1.2
 #   Dev: Rasya
 # ============================================
 
@@ -43,6 +43,88 @@ def pause():
 
 
 # ============================================
+#   ANIMASI
+# ============================================
+def typing(text, delay=0.04, color=""):
+    for ch in text:
+        sys.stdout.write(color + ch + NC)
+        sys.stdout.flush()
+        time.sleep(delay)
+    print()
+
+
+def loading(text="Loading", durasi=1.5):
+    end = time.time() + durasi
+    i = 0
+    while time.time() < end:
+        dots = "." * (i % 4)
+        sys.stdout.write(f"\r{C}  {text}{dots}   {NC}")
+        sys.stdout.flush()
+        time.sleep(0.15)
+        i += 1
+    print()
+
+
+# ============================================
+#   SPLASH SCREEN
+# ============================================
+def splash_screen():
+    clear()
+
+    print()
+    loading("  Menyalakan sistem", 1.0)
+    loading("  Memuat komponen", 0.9)
+    loading("  Menghubungkan server", 1.0)
+    clear()
+
+    # ---- Logo ASCII RASYAPREM ----
+    logo = [
+        "  ██████╗  █████╗ ███████╗██╗   ██╗ █████╗ ",
+        "  ██╔══██╗██╔══██╗██╔════╝╚██╗ ██╔╝██╔══██╗",
+        "  ██████╔╝███████║███████╗ ╚████╔╝ ███████║",
+        "  ██╔══██╗██╔══██║╚════██║  ╚██╔╝  ██╔══██║",
+        "  ██║  ██║██║  ██║███████║   ██║   ██║  ██║",
+        "  ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝",
+    ]
+
+    print()
+    for line in logo:
+        print(f"{P}{line}{NC}")
+        time.sleep(0.07)
+
+    print()
+    time.sleep(0.3)
+
+
+    # ---- Flicker "RASYAPREM v1.2" ----
+    frames = [
+        f"{Y}         R A S Y A P R E M   v 1 . 2{NC}",
+        f"{C}         R A S Y A P R E M   v 1 . 2{NC}",
+        f"{M}         R A S Y A P R E M   v 1 . 2{NC}",
+        f"{R}         R A S Y A P R E M   v 1 . 2{NC}",
+        f"{W}         R A S Y A P R E M   v 1 . 2{NC}",
+    ]
+
+    for _ in range(4):
+        for f in frames:
+            sys.stdout.write(f"\r{f}")
+            sys.stdout.flush()
+            time.sleep(0.08)
+
+    print()
+    print()
+    garis(60, P)
+    typing("           By Rasya", delay=0.06, color=f"{W}")
+    garis(60, P)
+
+    print()
+    print(f"{G}  [OK] Sistem siap!{NC}")
+    time.sleep(0.8)
+    print(f"{Y}  [i] Membuka menu utama...{NC}")
+    time.sleep(1.2)
+
+
+# ============================================
 #   SIMPAN / BACA LIST PREM
 # ============================================
 def simpan_ke_list(email, status="PREMIUM"):
@@ -77,23 +159,23 @@ def baca_list():
 def header():
     clear()
     garis(60, P)
-    print(f"{P}  RASYAPREM v1.1{NC}")
+    print(f"{P}  RASYAPREM v1.2{NC}")
     print(f"{W}  Dev: Rasya{NC}")
     garis(60, P)
     print()
     print(f"{R}  W A R N I N G  !!{NC}")
     print(f"{R}  Tools ini tidak diperjualbelikan{NC}")
     print(f"{R}  Kalau ada yang memperjualbelikan{NC}")
-    print(f"{R}  harap lapor ke developer tools nya.{NC}")
+    print(f"{R}  harap lapor ke developer.{NC}")
     print(f"{R}  Mohon diperhatikan.{NC}")
     print()
     garis(60, P)
-    print(f"{M}  INFO RELEASE v1.1{NC}")
+    print(f"{M}  INFO RELEASE v1.2{NC}")
     print(f"{G}  NEW RELEASE:{NC}")
-    print(f"  1. AUTO-SAVE LIST PREMIUM (REAL)")
-    print(f"  2. FITUR CEK LIST AMPREM (LIVE)")
-    print(f"  3. VALIDASI GMAIL & TEMP MAIL")
-    print(f"  4. FULLY REVAMPED DESIGN")
+    print(f"  1. SPLASH SCREEN ANIMATION")
+    print(f"  2. AUTO-SAVE LIST PREMIUM (REAL)")
+    print(f"  3. FITUR CEK LIST AMPREM (LIVE)")
+    print(f"  4. VALIDASI GMAIL & TEMP MAIL")
     print(f"{Y}  UNTUK INFO LENGKAP CHAT ME wa.me/6281549357354{NC}")
     garis(60, P)
     print()
@@ -148,7 +230,6 @@ def masukan_email():
         pause()
         return
 
-    # ==== VALIDASI KHUSUS GMAIL.COM ====
     if not gmail.endswith("@gmail.com"):
         clear()
         garis(60, R)
@@ -239,7 +320,6 @@ def masukan_link():
             headers=headers
         )
 
-        # ==== SIMPAN KE LIST ====
         simpan_ke_list(TEMP_EMAIL, "PREMIUM")
 
         print()
@@ -260,11 +340,12 @@ def tentang():
     print(f"{P}              TENTANG / INFO{NC}")
     print()
     print(f"  {W}Nama Script :{NC} RASYAPREM")
-    print(f"  {W}Versi       :{NC} v1.1")
+    print(f"  {W}Versi       :{NC} v1.2")
     print(f"  {W}Developer   :{NC} Rasya")
     print(f"  {W}Kontak      :{NC} wa.me/6281549357354")
     print()
     print(f"  {W}Fitur:{NC}")
+    print(f"   - Splash screen animation")
     print(f"   - Kirim magic link ke Gmail")
     print(f"   - Verifikasi link premium")
     print(f"   - Auto-save list premium")
@@ -405,7 +486,7 @@ def keluar():
     print()
     print(f"{P}  ============================================{NC}")
     print(f"{W}       TERIMA KASIH SUDAH MENGGUNAKAN{NC}")
-    print(f"{P}             RASYAPREM v1.1{NC}")
+    print(f"{P}             RASYAPREM v1.2{NC}")
     print(f"{P}  ============================================{NC}")
     print()
     time.sleep(1.2)
@@ -416,6 +497,8 @@ def keluar():
 #   MAIN
 # ============================================
 def main():
+    splash_screen()
+
     while True:
         pilih = menu_utama()
 

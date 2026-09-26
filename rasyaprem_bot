@@ -1,0 +1,289 @@
+#!/usr/bin/env python3
+# ============================================
+#   RASYAPREM TELEGRAM BOT
+#   Dev: Rasya
+# ============================================
+
+import logging
+import requests
+from telegram import Update
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    ContextTypes,
+)
+
+# ==== CONFIG ====
+BOT_TOKEN = "8945124140:AAEOp5OmMH1uKHKs_uTHRoSMsBKTIJ8c3xE"
+API_KEY = "FREE"
+ENDPOINT_SEND = "https://am.dapjisync.my.id/api/send"
+ENDPOINT_VERIF = "https://am.dapjisync.my.id/api/verif"
+
+# ==== LOGGING ====
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
+
+# ==== SIMPAN EMAIL USER ====
+user_data = {}
+
+
+# ============================================
+#   COMMAND: /start
+# ============================================
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pesan = (
+        "🎬 *RASYAPREM BOT*\n"
+        "By Rasya\n\n"
+        "⚠️ *WARNING!*\n"
+        "Tools ini tidak diperjualbelikan.\n"
+        "Kalau ada yang memperjualbelikan,\n"
+        "harap lapor ke developer.\n\n"
+        "📋 *Perintah:*\n"
+        "/gmail - Kirim link ke Gmail\n"
+        "/temp - Kirim link ke Temp Mail\n"
+        "/verif - Verifikasi link\n"
+        "/info - Info tools\n"
+        "/help - Bantuan\n\n"
+        "💬 Kontak: wa.me/6281549357354"
+    )
+    await update.message.reply_text(pesan, parse_mode="Markdown")
+
+
+# ============================================
+#   COMMAND: /gmail
+# ============================================
+async def gmail_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    if not context.args:
+        await update.message.reply_text(
+            "❌ Format salah!\n\n"
+            "Contoh:\n"
+            "`/gmail target@gmail.com`",
+            parse_mode="Markdown",
+        )
+        return
+
+    email = context.args[0].strip().lower()
+
+    if not email.endswith("@gmail.com"):
+        await update.message.reply_text(
+            "❌ *MENU INI KHUSUS GMAIL.COM*\n\n"
+            "Silakan pake:\n"
+            "`/gmail target@gmail.com`",
+            parse_mode="Markdown",
+        )
+        return
+
+    await update.message.reply_text(f"⏳ Mengirim link ke {email}...")
+
+    try:
+        r = requests.post(
+            ENDPOINT_SEND,
+            json={"gmail": email},
+            headers={
+                "Content-Type": "application/json",
+                "X-API-Key": API_KEY,
+            },
+            timeout=30,
+        )
+
+        user_data[user_id] = email
+
+        await update.message.reply_text(
+            f"✅ *Link terkirim!*\n\n"
+            f"📧 Email: `{email}`\n\n"
+            f"Langkah selanjutnya:\n"
+            f"1. Cek inbox / spam\n"
+            f"2. Copy link verifikasi\n"
+            f"3. Ketik:\n"
+            f"`/verif <link>`",
+            parse_mode="Markdown",
+        )
+
+    except Exception as e:
+        await update.message.reply_text(f"❌ Gagal: {e}")
+
+
+# ============================================
+#   COMMAND: /temp
+# ============================================
+async def temp_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    if not context.args:
+        await update.message.reply_text(
+            "❌ Format salah!\n\n"
+            "Contoh:\n"
+            "`/temp user@mail.tm`",
+            parse_mode="Markdown",
+        )
+        return
+
+    email = context.args[0].strip().lower()
+
+    if "@" not in email or "." not in email.split("@")[-1]:
+        await update.message.reply_text("❌ Format email tidak valid!")
+        return
+
+    await update.message.reply_text(f"⏳ Mengirim link ke {email}...")
+
+    try:
+        r = requests.post(
+            ENDPOINT_SEND,
+            json={"gmail": email},
+            headers={
+                "Content-Type": "application/json",
+                "X-API-Key": API_KEY,
+            },
+            timeout=30,
+        )
+
+        user_data[user_id] = email
+
+        await update.message.reply_text(
+            f"✅ *Link terkirim!*\n\n"
+            f"📧 Email: `{email}`\n\n"
+            f"Langkah selanjutnya:\n"
+            f"1. Cek inbox temp mail\n"
+            f"2. Copy link verifikasi\n"
+            f"3. Ketik:\n"
+            f"`/verif <link>`",
+            parse_mode="Markdown",
+        )
+
+    except Exception as e:
+        await update.message.reply_text(f"❌ Gagal: {e}")
+
+
+# ============================================
+#   COMMAND: /verif
+# ============================================
+async def verif_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    if user_id not in user_data:
+        await update.message.reply_text(
+            "❌ Belum ada email tersimpan!\n\n"
+            "Ketik dulu:\n"
+            "`/gmail target@gmail.com`\n"
+            "atau\n"
+            "`/temp user@mail.tm`",
+            parse_mode="Markdown",
+        )
+        return
+
+    if not context.args:
+        await update.message.reply_text(
+            "❌ Format salah!\n\n"
+            "Contoh:\n"
+            "`/verif https://alight-creative.firebaseapp.com/...`",
+            parse_mode="Markdown",
+        )
+        return
+
+    link = context.args[0].strip()
+    email = user_data[user_id]
+
+    await update.message.reply_text("⏳ Memverifikasi link...")
+
+    try:
+        r = requests.post(
+            ENDPOINT_VERIF,
+            json={"gmail": email, "link": link},
+            headers={
+                "Content-Type": "application/json",
+                "X-API-Key": API_KEY,
+            },
+            timeout=30,
+        )
+
+        await update.message.reply_text(
+            f"✅ *Verifikasi Berhasil!*\n\n"
+            f"📧 Email: `{email}`\n"
+            f"💎 Premium 1 tahun aktif!\n\n"
+            f"Buka Alight Motion sekarang! 🎬",
+            parse_mode="Markdown",
+        )
+
+    except Exception as e:
+        await update.message.reply_text(f"❌ Gagal: {e}")
+
+
+# ============================================
+#   COMMAND: /info
+# ============================================
+async def info_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pesan = (
+        "📋 *RASYAPREM BOT*\n\n"
+        "Versi: v1.0\n"
+        "Dev: Rasya\n"
+        "Kontak: wa.me/6281549357354\n\n"
+        "*Fitur:*\n"
+        "✅ Kirim link ke Gmail\n"
+        "✅ Kirim link ke Temp Mail\n"
+        "✅ Verifikasi premium\n"
+        "✅ Gratis!\n\n"
+        "⚠️ Tools ini *TIDAK diperjualbelikan*"
+    )
+    await update.message.reply_text(pesan, parse_mode="Markdown")
+
+
+# ============================================
+#   COMMAND: /help
+# ============================================
+async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pesan = (
+        "📖 *CARA PAKE BOT*\n\n"
+        "*1. Kirim link ke Gmail:*\n"
+        "`/gmail target@gmail.com`\n\n"
+        "*2. Kirim link ke Temp Mail:*\n"
+        "`/temp user@mail.tm`\n\n"
+        "*3. Verifikasi link:*\n"
+        "`/verif <paste_link_disini>`\n\n"
+        "*4. Info tools:*\n"
+        "`/info`\n\n"
+        "*5. Kontak developer:*\n"
+        "wa.me/6281549357354"
+    )
+    await update.message.reply_text(pesan, parse_mode="Markdown")
+
+
+# ============================================
+#   HANDLER PESAN BIASA
+# ============================================
+async def pesan_biasa(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    pesan = (
+        "❓ Perintah tidak dikenal.\n\n"
+        "Ketik /help buat liat perintah yang tersedia."
+    )
+    await update.message.reply_text(pesan)
+
+
+# ============================================
+#   MAIN
+# ============================================
+def main():
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("gmail", gmail_cmd))
+    app.add_handler(CommandHandler("temp", temp_cmd))
+    app.add_handler(CommandHandler("verif", verif_cmd))
+    app.add_handler(CommandHandler("info", info_cmd))
+    app.add_handler(CommandHandler("help", help_cmd))
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, pesan_biasa))
+
+    print("🤖 Bot RASYAPREM jalan...")
+    print("Tekan CTRL + C buat stop.")
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
